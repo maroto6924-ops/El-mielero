@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antigüedades El Mielero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getFirestore, collection, addDoc, getDocs, orderBy, query }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyB9mSF3RsWs1iYoShocPkI3nXl3UCUMh8E",
+    authDomain:        "telefinder-ea033.firebaseapp.com",
+    projectId:         "telefinder-ea033",
+    storageBucket:     "telefinder-ea033.firebasestorage.app",
+    messagingSenderId: "395387321523",
+    appId:             "1:395387321523:web:62ed43629c0a11fd6d04c6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  window._fbSave = async (entry) => {
+    await addDoc(collection(db, 'antiguedades'), entry);
+  };
+  window._fbLoad = async () => {
+    const q = query(collection(db, 'antiguedades'), orderBy('savedAt', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ firestoreId: d.id, ...d.data() }));
+  };
+  window._firebaseReady = true;
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<style>
+  :root {
+    --bg:#F0F2EC;--bg2:#E4E8DE;--surface:#FFFFFF;--surface2:#F4F6F1;
+    --border:#D4DBCC;--text:#161D12;--text2:#546048;--text3:#8A9880;
+    --accent:#3B5E2B;--accent2:#2A4520;--accent-light:#DCE8D4;
+    --gold:#8A7020;--gold-light:#F5F0D8;
+    --green:#2E6655;--green-light:#D0EAE4;--red:#A83030;--red-light:#FDECEA;
+    --blue:#2A4F7A;--blue-light:#D4E4F5;--orange:#C07020;--orange-light:#FDF0DC;
+    --radius:16px;--radius-sm:10px;
+    --shadow:0 2px 16px rgba(0,0,0,0.07);--shadow-lg:0 8px 40px rgba(0,0,0,0.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;}
+
+  /* HEADER */
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;height:60px;}
+  .header-logo{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:34px;height:34px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;color:white;font-size:16px;}
+  .logo-text{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);letter-spacing:-0.5px;}
+  .header-nav{display:flex;gap:4px;}
+  .nav-btn{padding:7px 14px;border-radius:8px;border:none;background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+  .nav-btn.active,.nav-btn:hover{background:var(--accent-light);color:var(--accent2);}
+
+  /* PAGES */
+  .page{display:none;padding:24px 20px 80px;max-width:600px;margin:0 auto;}
+  .page.active{display:block;}
+  #page-home{padding-top:0;}
+
+  /* HERO COVER */
+  .hero-cover{position:relative;margin:-24px -20px 28px;height:340px;overflow:hidden;background:linear-gradient(160deg,#0a1a08 0%,#162810 40%,#071205 100%);border-radius:0 0 28px 28px;}
+  .hero-cover::before{content:'';position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");opacity:0.5;pointer-events:none;z-index:1;}
+  .hero-cover::after{content:'';position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);width:340px;height:220px;background:radial-gradient(ellipse,rgba(80,140,50,0.20) 0%,transparent 70%);pointer-events:none;z-index:1;}
+  .hero-obj-svg{position:absolute;bottom:-10px;right:-10px;width:240px;opacity:0.16;z-index:2;filter:drop-shadow(0 0 30px rgba(100,160,60,0.35));animation:floatObj 7s ease-in-out infinite;}
+  @keyframes floatObj{0%,100%{transform:translateY(0px) rotate(3deg);}50%{transform:translateY(-12px) rotate(3deg);}}
+  .hero-content{position:relative;z-index:3;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;height:100%;padding:28px 24px 32px;}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(100,160,60,0.15);border:1px solid rgba(100,160,60,0.32);color:#9dc870;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:14px;backdrop-filter:blur(4px);animation:fadeUp 0.6s ease both;}
+  .hero-badge::before{content:'◆';font-size:7px;}
+  .hero-title{font-family:'DM Serif Display',serif;font-size:52px;letter-spacing:-2px;line-height:0.95;color:#f5ead5;margin-bottom:6px;animation:fadeUp 0.7s 0.1s ease both;}
+  .hero-title em{font-style:italic;color:#7DB85A;display:block;}
+  .hero-sub{font-size:13px;color:rgba(245,234,213,0.55);letter-spacing:0.3px;margin-bottom:22px;max-width:240px;line-height:1.5;animation:fadeUp 0.7s 0.2s ease both;}
+  .hero-pills{display:flex;gap:8px;flex-wrap:wrap;animation:fadeUp 0.7s 0.3s ease both;}
+  .hero-pill{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:rgba(245,234,213,0.7);font-size:11px;font-weight:500;padding:5px 11px;border-radius:20px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  .hero-scanline{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(100,160,60,0.55),transparent);z-index:4;animation:scanMove 4s ease-in-out infinite;}
+  @keyframes scanMove{0%{top:0%;opacity:1;}80%{top:100%;opacity:0.4;}100%{top:100%;opacity:0;}}
+
+  /* CARD */
+  .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px;box-shadow:var(--shadow);}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+
+  /* CATEGORY SELECTOR */
+  .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px;}
+  .cat-btn{border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.2s;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;display:flex;flex-direction:column;align-items:center;gap:5px;}
+  .cat-btn.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent2);}
+  .cat-btn:hover{border-color:var(--gold);background:var(--gold-light);}
+  .cat-btn .cat-icon{font-size:22px;}
+
+  /* UPLOAD */
+  .upload-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+  .upload-btn{border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:var(--surface2);padding:14px;text-align:center;cursor:pointer;transition:all 0.2s;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;display:block;}
+  .upload-btn:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent2);}
+  .upload-btn .icon{font-size:20px;display:block;margin-bottom:5px;}
+  input[type=file]{display:none;}
+
+  /* PHOTO STRIP */
+  .photo-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+  .photo-thumb{position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;flex-shrink:0;}
+  .photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .photo-remove{position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;}
+  .photo-add-btn{width:72px;height:72px;border:1.5px dashed var(--border);border-radius:10px;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--text3);font-size:11px;gap:3px;transition:all 0.2s;}
+  .photo-add-btn:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent2);}
+  .photo-add-btn span{font-size:20px;}
+  .photo-count{font-size:11px;color:var(--text3);margin-top:6px;margin-bottom:12px;}
+
+  .divider{display:flex;align-items:center;gap:12px;color:var(--text3);font-size:12px;margin:14px 0;}
+  .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+  textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);resize:none;height:110px;transition:border-color 0.2s;outline:none;}
+  textarea:focus{border-color:var(--accent);}
+  textarea::placeholder{color:var(--text3);}
+  .hint{font-size:12px;color:var(--text3);margin-top:8px;display:flex;align-items:center;gap:6px;}
+
+  /* BUTTONS */
+  .btn-primary{width:100%;background:var(--accent);color:white;border:none;border-radius:var(--radius-sm);padding:16px;font-family:'DM Serif Display',serif;font-size:17px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-primary:hover{background:var(--accent2);transform:translateY(-1px);}
+  .btn-save{width:100%;background:var(--green);color:white;border:none;border-radius:var(--radius-sm);padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;}
+  .btn-save:hover{opacity:0.9;transform:translateY(-1px);}
+
+  /* LOADING */
+  .loading-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;display:none;}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-text{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);margin-bottom:6px;}
+  .loading-sub{font-size:13px;color:var(--text3);}
+
+  /* RESULT */
+  .result-back{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;padding:0;margin-bottom:20px;}
+  .result-name{font-family:'DM Serif Display',serif;font-size:26px;letter-spacing:-0.5px;line-height:1.2;margin-bottom:10px;}
+  .result-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500;}
+  .tag-period{background:var(--accent-light);color:var(--accent2);}
+  .tag-rarity-common{background:var(--green-light);color:var(--green);}
+  .tag-rarity-rare{background:var(--orange-light);color:var(--orange);}
+  .tag-rarity-uncommon{background:var(--blue-light);color:var(--blue);}
+  .tag-material{background:var(--bg2);color:var(--text2);}
+  .tag-gold{background:var(--gold-light);color:var(--gold);}
+  .desc-section{background:var(--surface2);border-left:3px solid var(--accent);padding:14px 16px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;margin-bottom:16px;font-size:14px;line-height:1.7;}
+
+  /* TABS */
+  .tabs-nav{display:flex;gap:0;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:4px;}
+  .tab-btn{flex:1;padding:9px 6px;border:none;background:transparent;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all 0.2s;text-align:center;}
+  .tab-btn.active{background:var(--accent);color:white;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  /* PRICES */
+  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .price-card{border-radius:var(--radius-sm);padding:16px;text-align:center;}
+  .price-card.buy{background:var(--green-light);}
+  .price-card.sell{background:var(--accent-light);}
+  .price-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+  .price-card.buy .price-label{color:var(--green);}
+  .price-card.sell .price-label{color:var(--accent2);}
+  .price-value{font-family:'DM Serif Display',serif;font-size:22px;line-height:1.1;}
+  .price-card.buy .price-value{color:var(--green);}
+  .price-card.sell .price-value{color:var(--accent2);}
+  .margin-row{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .margin-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+  .margin-val{font-family:'DM Serif Display',serif;font-size:18px;color:var(--green);}
+  .last-price{background:var(--blue-light);border-radius:var(--radius-sm);padding:12px 16px;display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+  .last-price-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--blue);min-width:58px;padding-top:2px;}
+  .last-price-val{font-size:14px;color:var(--blue);font-weight:500;line-height:1.4;}
+  .chart-wrap{position:relative;height:175px;margin-top:4px;}
+
+  /* SECTIONS */
+  .section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;}
+  .section-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+  .icon-orange{background:var(--orange-light);}
+  .icon-red{background:var(--red-light);}
+  .icon-green{background:var(--green-light);}
+  .icon-blue{background:var(--blue-light);}
+  .icon-yellow{background:var(--gold-light);}
+  .section-title{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text2);}
+  .check-list{list-style:none;}
+  .check-list li{padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:10px;line-height:1.5;}
+  .check-list li:last-child{border-bottom:none;}
+  .numbered-list{list-style:none;counter-reset:item;}
+  .numbered-list li{counter-increment:item;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:12px;align-items:flex-start;line-height:1.5;}
+  .numbered-list li:last-child{border-bottom:none;}
+  .numbered-list li::before{content:counter(item);background:var(--blue);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;margin-top:1px;}
+  .alert-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;line-height:1.5;}
+  .alert-item:last-child{border-bottom:none;}
+  .prose-box{font-size:14px;line-height:1.7;}
+  .min-state-box{background:var(--green-light);border-radius:var(--radius-sm);padding:14px;font-size:14px;line-height:1.6;color:var(--green);}
+  .auth-box{background:var(--gold-light);border-radius:var(--radius-sm);padding:14px;font-size:14px;line-height:1.6;color:var(--gold);border:1px solid rgba(184,134,11,0.2);}
+  .confidence-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text3);}
+  .confidence-badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;}
+  .conf-alta{background:var(--green-light);color:var(--green);}
+  .conf-media{background:var(--accent-light);color:var(--accent2);}
+  .conf-baja{background:var(--red-light);color:var(--red);}
+  .sources-box{font-size:11px;color:var(--text3);line-height:1.7;padding-top:12px;border-top:1px solid var(--border);margin-top:8px;}
+
+  /* COLLECTION */
+  .page-header{margin-bottom:24px;}
+  .page-header h2{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-0.5px;margin-bottom:4px;}
+  .page-header p{font-size:13px;color:var(--text2);}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--text3);margin-bottom:12px;margin-top:20px;}
+  .antique-grid{display:flex;flex-direction:column;gap:10px;}
+  .antique-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);cursor:pointer;transition:all 0.2s;}
+  .antique-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+  .antique-thumb{width:52px;height:52px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden;}
+  .antique-thumb img{width:100%;height:100%;object-fit:cover;}
+  .antique-info{flex:1;min-width:0;}
+  .antique-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+  .antique-sub{font-size:12px;color:var(--text2);}
+  .antique-price{font-family:'DM Serif Display',serif;font-size:16px;color:var(--accent2);text-align:right;flex-shrink:0;}
+  .antique-price span{display:block;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--text3);font-weight:400;}
+  .empty-state{text-align:center;padding:48px 20px;color:var(--text3);}
+  .empty-state .empty-icon{font-size:48px;margin-bottom:16px;}
+  .empty-state h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text2);margin-bottom:8px;}
+  .stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 10px;text-align:center;}
+  .stat-val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--accent);line-height:1;margin-bottom:4px;}
+  .stat-lbl{font-size:11px;color:var(--text3);}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:white;padding:12px 20px;border-radius:24px;font-size:13px;font-weight:500;opacity:0;transition:all 0.3s;z-index:999;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-icon">🏺</div>
+    <span class="logo-text">El Mielero</span>
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn active" onclick="showPage('home')">Identificar</button>
+    <button class="nav-btn" onclick="showPage('collection')">Colección</button>
+  </nav>
+</header>
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+
+  <div class="hero-cover">
+    <div class="hero-scanline"></div>
+    <!-- SVG decorativo: jarrón/urna clásica -->
+    <svg class="hero-obj-svg" viewBox="0 0 280 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Base -->
+      <ellipse cx="140" cy="350" rx="70" ry="12" fill="#c8a870" opacity="0.7"/>
+      <rect x="90" y="335" width="100" height="18" rx="6" fill="#c8a870"/>
+      <!-- Cuerpo del jarrón -->
+      <path d="M100 335 Q60 280 65 210 Q60 140 100 100 Q120 80 140 78 Q160 80 180 100 Q220 140 215 210 Q220 280 180 335 Z" fill="#b8946a"/>
+      <path d="M100 335 Q60 280 65 210 Q60 140 100 100 Q120 80 140 78 Q160 80 180 100 Q220 140 215 210 Q220 280 180 335 Z" fill="url(#vaseGrad)" opacity="0.6"/>
+      <!-- Boca del jarrón -->
+      <ellipse cx="140" cy="78" rx="40" ry="10" fill="#c8a870"/>
+      <rect x="100" y="68" width="80" height="20" rx="8" fill="#c8a870"/>
+      <ellipse cx="140" cy="68" rx="40" ry="10" fill="#d4b880"/>
+      <!-- Asas -->
+      <path d="M65 180 Q30 180 30 210 Q30 240 65 240" stroke="#a07848" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path d="M215 180 Q250 180 250 210 Q250 240 215 240" stroke="#a07848" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <!-- Decoración: franja superior -->
+      <rect x="102" y="110" width="76" height="12" rx="4" fill="#8a6430" opacity="0.5"/>
+      <!-- Decoración: franja inferior -->
+      <rect x="102" y="310" width="76" height="12" rx="4" fill="#8a6430" opacity="0.5"/>
+      <!-- Decoración: motivo central -->
+      <ellipse cx="140" cy="210" rx="35" ry="50" fill="#9a7848" opacity="0.3"/>
+      <path d="M120 190 Q140 170 160 190 Q170 210 160 230 Q140 250 120 230 Q110 210 120 190 Z" fill="#7a5830" opacity="0.4"/>
+      <!-- Detalles griegos -->
+      <path d="M108 130 L172 130" stroke="#7a5830" stroke-width="1.5" opacity="0.6"/>
+      <path d="M108 295 L172 295" stroke="#7a5830" stroke-width="1.5" opacity="0.6"/>
+      <defs>
+        <linearGradient id="vaseGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.3"/>
+          <stop offset="50%" stop-color="#ffffff" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0.2"/>
+        </linearGradient>
+      </defs>
+    </svg>
+    <div class="hero-content">
+      <div class="hero-badge">Identificador &amp; Tasador</div>
+      <div class="hero-title">El<em>Mielero</em></div>
+      <div class="hero-sub">Identifica y valora antigüedades y objetos de colección con inteligencia artificial</div>
+      <div class="hero-pills">
+        <span class="hero-pill">🏛️ Mercado español</span>
+        <span class="hero-pill">📚 +40 fuentes</span>
+        <span class="hero-pill">📸 Hasta 5 fotos</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📦 Categoría del objeto</div>
+    <div class="cat-grid" id="catGrid">
+      <button class="cat-btn" data-cat="Cerámica y Porcelana" onclick="selectCat(this)"><span class="cat-icon">🏺</span>Cerámica</button>
+      <button class="cat-btn" data-cat="Muebles Antiguos" onclick="selectCat(this)"><span class="cat-icon">🪑</span>Muebles</button>
+      <button class="cat-btn" data-cat="Pintura y Arte" onclick="selectCat(this)"><span class="cat-icon">🖼️</span>Arte</button>
+      <button class="cat-btn" data-cat="Joyería y Relojes" onclick="selectCat(this)"><span class="cat-icon">💍</span>Joyería</button>
+      <button class="cat-btn" data-cat="Libros y Documentos" onclick="selectCat(this)"><span class="cat-icon">📖</span>Libros</button>
+      <button class="cat-btn" data-cat="Juguetes y Juegos" onclick="selectCat(this)"><span class="cat-icon">🎪</span>Juguetes</button>
+      <button class="cat-btn" data-cat="Monedas y Billetes" onclick="selectCat(this)"><span class="cat-icon">🪙</span>Monedas</button>
+      <button class="cat-btn" data-cat="Objetos Militares" onclick="selectCat(this)"><span class="cat-icon">🎖️</span>Militar</button>
+      <button class="cat-btn" data-cat="Varios / No sé" onclick="selectCat(this)"><span class="cat-icon">🔍</span>Otro</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📸 Fotografías del objeto <span style="font-weight:400;color:var(--text3)">(hasta 5)</span></div>
+    <div class="upload-btns" id="uploadBtns">
+      <label class="upload-btn" for="cameraInput"><span class="icon">📷</span>Cámara</label>
+      <label class="upload-btn" for="galleryInput"><span class="icon">🖼️</span>Galería</label>
+    </div>
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="addImage(this)">
+    <input type="file" id="galleryInput" accept="image/*" onchange="addImage(this)">
+    <input type="file" id="extraInput" accept="image/*" onchange="addImage(this)">
+    <div class="photo-strip" id="photoStrip"></div>
+    <div class="photo-count" id="photoCount" style="display:none"></div>
+    <div class="divider">o describe con texto</div>
+    <textarea id="descInput" placeholder="Describe el objeto: material (porcelana, madera, bronce...), marcas o sellos en el fondo, dimensiones aproximadas, colores, detalles decorativos, estado, precio del vendedor..."></textarea>
+    <div class="hint">💡 Fotos del sello/marca del fabricante, reverso y detalles aumentan mucho la precisión</div>
+  </div>
+
+  <button class="btn-primary" id="analyzeBtn" onclick="analyzeAntique()">
+    <span>🔍</span> Identificar y Valorar
+  </button>
+
+  <div class="loading-card" id="loadingCard">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Analizando el objeto…</div>
+    <div class="loading-sub" id="loadingSub">Comprimiendo imágenes y consultando bases de datos</div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="page" id="page-result">
+  <button class="result-back" onclick="showPage('home')">← Nuevo análisis</button>
+  <div class="result-name" id="r-name">—</div>
+  <div class="result-meta" id="r-meta"></div>
+  <div class="desc-section" id="r-desc"></div>
+
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="switchTab(event,'precios')">💰 Precios</button>
+    <button class="tab-btn" onclick="switchTab(event,'revision')">🔎 Revisión</button>
+    <button class="tab-btn" onclick="switchTab(event,'cuidado')">✨ Cuidado</button>
+    <button class="tab-btn" onclick="switchTab(event,'info')">📋 Info</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-precios">
+    <div class="price-grid">
+      <div class="price-card buy"><div class="price-label">Precio Compra</div><div class="price-value" id="r-buy">—</div></div>
+      <div class="price-card sell"><div class="price-label">Precio Venta</div><div class="price-value" id="r-sell">—</div></div>
+    </div>
+    <div class="margin-row"><span class="margin-label">Margen si compras bien</span><span class="margin-val" id="r-margin">—</span></div>
+    <div class="last-price"><span class="last-price-label">Último vendido</span><span class="last-price-val" id="r-last">—</span></div>
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-yellow">📈</div><div class="section-title">Proyección de Valor</div></div>
+      <div class="chart-wrap"><canvas id="priceChart"></canvas></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-yellow">🤝</div><div class="section-title">Cómo Negociar</div></div>
+      <div class="prose-box" id="r-negotiate"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-revision">
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-orange">🔶</div><div class="section-title">Qué Revisar</div></div>
+      <ul class="check-list" id="r-inspect"></ul>
+    </div>
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-red">⚠️</div><div class="section-title">Señales de Falsificación / Alerta</div></div>
+      <div id="r-alerts"></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-green">✅</div><div class="section-title">Estado Mínimo Aceptable</div></div>
+      <div class="min-state-box" id="r-minstate"></div>
+    </div>
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-yellow">🏅</div><div class="section-title">Cómo Autentificar</div></div>
+      <div class="auth-box" id="r-auth"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-cuidado">
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-blue">✨</div><div class="section-title">Conservación y Limpieza</div></div>
+      <ol class="numbered-list" id="r-clean"></ol>
+    </div>
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-green">📦</div><div class="section-title">Cómo Almacenar</div></div>
+      <div class="prose-box" id="r-storage"></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-info">
+    <div class="section">
+      <div class="section-header"><div class="section-icon icon-blue">🏛️</div><div class="section-title">Dónde Vender</div></div>
+      <div id="r-where-sell"></div>
+    </div>
+    <div class="section">
+      <div class="confidence-row"><span>Confianza de IA:</span><span class="confidence-badge" id="r-conf">—</span></div>
+      <div class="sources-box" id="r-sources"></div>
+    </div>
+  </div>
+
+  <button class="btn-save" onclick="saveToCollection()">💾 Guardar en Mi Colección</button>
+</div>
+
+<!-- COLLECTION -->
+<div class="page" id="page-collection">
+  <div class="page-header"><h2>Mi Colección</h2><p>Tus antigüedades identificadas y guardadas</p></div>
+  <div class="stats-strip" id="collectionStats"></div>
+  <div id="collectionContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────
+let currentResult = null;
+let currentImages = [];
+let chartInstance = null;
+let selectedCategory = '';
+const MAX_PHOTOS = 5;
+const MAX_DIM    = 800;
+const QUALITY    = 0.72;
+
+// ── CATEGORY ──────────────────────────────────────────────
+function selectCat(btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedCategory = btn.dataset.cat;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  const idx = ['home','collection'].indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
+  if (name === 'collection') renderCollection();
+  window.scrollTo(0, 0);
+}
+
+function switchTab(e, name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  e.target.classList.add('active');
+}
+
+// ── IMAGES ────────────────────────────────────────────────
+function addImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (currentImages.length >= MAX_PHOTOS) { showToast('Máximo ' + MAX_PHOTOS + ' fotos'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    compressImage(e.target.result, compressed => {
+      currentImages.push({ dataUrl: compressed, b64: compressed.split(',')[1] });
+      renderPhotoStrip();
+      input.value = '';
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function compressImage(dataUrl, cb) {
+  const img = new Image();
+  img.onload = () => {
+    let w = img.width, h = img.height;
+    const scale = Math.min(1, MAX_DIM / Math.max(w, h));
+    w = Math.round(w * scale); h = Math.round(h * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    cb(canvas.toDataURL('image/jpeg', QUALITY));
+  };
+  img.src = dataUrl;
+}
+
+function removePhoto(idx) { currentImages.splice(idx, 1); renderPhotoStrip(); }
+
+function renderPhotoStrip() {
+  const strip   = document.getElementById('photoStrip');
+  const countEl = document.getElementById('photoCount');
+  strip.innerHTML = '';
+  currentImages.forEach((img, i) => {
+    strip.innerHTML += `<div class="photo-thumb"><img src="${img.dataUrl}"><button class="photo-remove" onclick="removePhoto(${i})">✕</button></div>`;
+  });
+  if (currentImages.length < MAX_PHOTOS) {
+    strip.innerHTML += `<label class="photo-add-btn" for="extraInput"><span>＋</span><span>Añadir</span></label>`;
+  }
+  if (currentImages.length > 0) {
+    countEl.style.display = 'block';
+    countEl.textContent = `${currentImages.length} foto${currentImages.length>1?'s':''} añadida${currentImages.length>1?'s':''} · ${MAX_PHOTOS-currentImages.length} restante${MAX_PHOTOS-currentImages.length!==1?'s':''}`;
+    document.getElementById('uploadBtns').style.display = 'none';
+  } else {
+    countEl.style.display = 'none';
+    document.getElementById('uploadBtns').style.display = 'grid';
+  }
+}
+
+// ── ANALYZE ───────────────────────────────────────────────
+async function analyzeAntique() {
+  const desc = document.getElementById('descInput').value.trim();
+  if (!desc && currentImages.length === 0) { showToast('Añade una foto o descripción primero'); return; }
+
+  document.getElementById('analyzeBtn').style.display = 'none';
+  document.getElementById('loadingCard').style.display = 'block';
+
+  const userContent = [];
+  for (let i = 0; i < currentImages.length; i++) {
+    document.getElementById('loadingSub').textContent = `Preparando foto ${i+1} de ${currentImages.length}…`;
+    userContent.push({ type:'image', source:{ type:'base64', media_type:'image/jpeg', data: currentImages[i].b64 } });
+  }
+  document.getElementById('loadingText').textContent = 'Identificando el objeto…';
+  document.getElementById('loadingSub').textContent  = 'Consultando bases de datos de antigüedades';
+
+  const catContext = selectedCategory ? `Categoría indicada por el usuario: ${selectedCategory}.` : 'Categoría no especificada, determínala tú.';
+  userContent.push({ type:'text', text: (desc || `Identifica la antigüedad en la${currentImages.length>1?' ' +currentImages.length+' imágenes':'imagen'}.`) + '\n' + catContext });
+
+  const systemPrompt = `Eres Antigüedades El Mielero, el experto mundial en identificación, autenticación y tasación de antigüedades y objetos de colección, con especial foco en el mercado español. Tienes acceso a las siguientes fuentes académicas, museísticas y de mercado:
+
+FUENTES ACADÉMICAS Y ARCHIVOS MUSEÍSTICOS:
+- Museo Nacional de Artes Decorativas (Madrid) – Catálogo y fondos documentales
+- Museo Arqueológico Nacional (Madrid) – Colección cerámica y objetos históricos
+- Museu Nacional d'Art de Catalunya – Colección artes decorativas
+- Museo Nacional de Cerámica y Artes Suntuarias González Martí (Valencia)
+- Museo de Artes y Costumbres Populares de Sevilla
+- Christie's Auction House – Archives & Appraisal Database (1766-presente)
+- Sotheby's – Historical Price Database & Provenance Records
+- Bonhams Auctioneers – Specialist Reports (Fine Art, Ceramics, Furniture)
+- Dorotheum Wien – European Antiques Auction Records
+- Phillips de Pury & Company – Contemporary & Classic Collections
+- The Getty Research Institute – Provenance Index Databases
+- Victoria and Albert Museum London – Collections Database (2.3M objects)
+- Metropolitan Museum of Art New York – Heilbrunn Timeline of Art History
+- Rijksmuseum Amsterdam – Object Classification & Dating Reference
+- Musée du Louvre – Département des Arts Décoratifs
+- Hermitage Museum St. Petersburg – European Decorative Arts Collection
+- Museo del Prado – Artes Decorativas y Colecciones Históricas
+- Museo Thyssen-Bornemisza (Madrid) – Base de datos de valoraciones
+- Fundación Caja Madrid – Programa de Patrimonio Histórico
+
+FUENTES ESPECIALIZADAS POR CATEGORÍA:
+CERÁMICA Y PORCELANA:
+- Kovels' Antiques & Collectibles Price Guide (ediciones 1990-2024)
+- Encyclopaedia of British Pottery and Porcelain Marks – Geoffrey Godden
+- Lladró Official Collector's Guide & Archives (Valencia, 1953-presente)
+- Catálogo Pickman / La Cartuja de Sevilla – Sellos y modelos históricos
+- Talavera de la Reina – Denominación de Origen y registros históricos
+- Manises Azulejos y Cerámica – Archivo Histórico de la Comunidad Valenciana
+- Royal Copenhagen – Hallmark Reference Database
+- Meissen Porcelain – Official Mark Registry (1710-presente)
+- Wedgwood Archives Barlaston – Pattern & Shape Books
+- Capodimonte Registry (Nápoles) – Modelos y marcas auténticos
+
+MUEBLES:
+- Colegio de Anticuarios de España – Guía de Estilos y Periodos
+- Muebles Españoles – Siglos XVI al XX (Ministerio de Cultura, 2008)
+- L'Encyclopédie du Mobilier Français – Pierre Kjellberg
+- English Furniture 1660-1714 – Adam Bowett
+- Miller's Antiques Encyclopedia (ediciones 2010-2024)
+
+PINTURA Y ARTE:
+- Artprice.com – Base de datos de subastas de arte (1987-2024)
+- AskArt – Artist Signatures & Auction Records
+- UAEG – Unión de Anticuarios Expertos en Arte de España
+- Catálogo Razonado de Pintores Españoles – Museo del Prado
+- Bénézit Dictionary of Artists – Gründ Editions
+
+JOYERÍA Y RELOJES:
+- Marcamp – Marcas de Platería y Joyería en España (siglos XVII-XX)
+- Contraste de Platería Española – Ministerio de Hacienda
+- Patek Philippe Museum Geneva – Historical Reference
+- Omega Museum Biel – Caliber & Reference Database
+- Rolex Official Archives – Reference & Production Numbers
+
+LIBROS Y DOCUMENTOS:
+- Biblioteca Nacional de España – Catálogo Bibliográfico Histórico
+- ABPC (American Book Prices Current) – Base de datos de primeras ediciones
+- Antiquarian Booksellers' Association of America – Price Guide
+
+JUGUETES:
+- BAAC (British Antique & Collectables Association) – Toy Reference Guide
+- Lehmann Toys Archives (1881-presente) – Catálogo de modelos
+- Steiff Archives Giengen – Registro oficial peluches (1880-presente)
+
+MONEDAS Y NUMISMÁTICA:
+- Real Casa de la Moneda – Catálogo Numismático Español
+- Numismática Española – Carlos Figueras (2018)
+- Standard Catalog of World Coins – Krause Publications
+
+FUENTES DE MERCADO ESPAÑOL Y EUROPEO:
+- Todocolección.net – histórico de ventas 2010-2024
+- Catawiki – subastas especializadas antigüedades (150.000+ ventas/año)
+- Wallapop ES – precios vendidos 2018-2024
+- eBay.es / eBay.de / eBay.fr – completados y vendidos
+- Delcampe – mercado europeo coleccionismo
+- LiveAuctioneers – subastas internacionales (500+ casas de subastas)
+- The Saleroom UK – resultados de subastas especializadas
+- Barnebys – agregador subastas Europa
+- Setdart – casa de subastas online española (2002-presente)
+- Subasta Segre (Barcelona) – resultados históricos
+- Alcalá Subastas (Madrid) – archivo de resultados
+- Durán Subastas (Madrid) – histórico de precios
+- Fernando Durán (Madrid) – especialistas en arte español
+- Balclis (Barcelona) – subastas de arte y antigüedades
+- APRECU – Asociación Profesional de Expertos en Comercio y Valoración de Objetos de Arte y Antigüedades
+- Mercado del Arte y las Antigüedades – Informe ANUARIO THYSSEN (2015-2024)
+
+Responde ÚNICAMENTE con un objeto JSON válido, sin texto antes ni después, sin backticks ni markdown:
+{
+  "nombre": "Nombre completo del objeto",
+  "fabricante": "Fabricante, taller o autor si se identifica",
+  "pais": "País de fabricación",
+  "periodo": "Años o época (ej: 1880-1900 / Art Nouveau / S.XIX)",
+  "material": "Material principal",
+  "estilo": "Estilo o movimiento artístico",
+  "rareza": "COMÚN|POCO COMÚN|RARO|MUY RARO",
+  "categoria": "Categoría del objeto",
+  "descripcion": "Párrafo rico sobre historia, contexto y características del objeto (3-5 frases)",
+  "precio_compra_min": 40,
+  "precio_compra_max": 80,
+  "precio_venta_min": 90,
+  "precio_venta_max": 160,
+  "ultimo_precio": "110EUR en Catawiki / 95-130EUR en Todocolección 2023-2024",
+  "proyeccion": [85, 95, 110, 112, 125, 140, 160],
+  "que_revisar": ["punto 1", "punto 2", "punto 3", "punto 4", "punto 5"],
+  "alertas": ["alerta falsificación 1", "alerta 2", "alerta 3"],
+  "estado_minimo": "Descripción del estado mínimo aceptable para colección",
+  "como_autentificar": "Cómo verificar autenticidad: sellos, marcas, pruebas específicas (2-4 frases)",
+  "como_limpiar": ["paso 1", "paso 2", "paso 3", "paso 4"],
+  "como_almacenar": "Condiciones óptimas de almacenamiento y conservación (2-3 frases)",
+  "donde_vender": ["plataforma o casa de subastas 1 con descripción breve", "plataforma 2", "plataforma 3", "plataforma 4"],
+  "como_negociar": "Consejos de negociación para este tipo de objeto (2-4 frases)",
+  "confianza": "ALTA|MEDIA|BAJA",
+  "fuentes_usadas": "5-7 fuentes específicas usadas para este objeto"
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userContent }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error('Error ' + response.status + ': ' + (err.error?.message || JSON.stringify(err)));
+    }
+
+    const data  = await response.json();
+    const raw   = data.content.map(c => c.text || '').join('');
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    currentResult = result;
+    renderResult(result);
+
+  } catch(err) {
+    console.error(err);
+    showToast('❌ ' + (err.message || 'Error al analizar. Inténtalo de nuevo.'));
+  }
+
+  document.getElementById('loadingCard').style.display = 'none';
+  document.getElementById('analyzeBtn').style.display = 'flex';
+  document.getElementById('loadingText').textContent = 'Analizando el objeto…';
+  document.getElementById('loadingSub').textContent  = 'Comprimiendo imágenes y consultando bases de datos';
+}
+
+// ── RENDER RESULT ─────────────────────────────────────────
+function renderResult(r) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)  => b.classList.toggle('active', i===0));
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===0));
+
+  document.getElementById('r-name').textContent = r.nombre || '—';
+
+  const meta = document.getElementById('r-meta');
+  meta.innerHTML = '';
+  if (r.periodo)  meta.innerHTML += `<span class="tag tag-period">📅 ${r.periodo}</span>`;
+  if (r.rareza) {
+    const cls = r.rareza.includes('MUY')||r.rareza==='RARO' ? 'tag-rarity-rare' : r.rareza.includes('POCO') ? 'tag-rarity-uncommon' : 'tag-rarity-common';
+    meta.innerHTML += `<span class="tag ${cls}">${r.rareza}</span>`;
+  }
+  if (r.material) meta.innerHTML += `<span class="tag tag-material">${r.material}</span>`;
+  if (r.estilo)   meta.innerHTML += `<span class="tag tag-gold">✦ ${r.estilo}</span>`;
+  if (r.pais)     meta.innerHTML += `<span class="tag tag-material">🌍 ${r.pais}</span>`;
+
+  document.getElementById('r-desc').textContent = r.descripcion || '';
+
+  document.getElementById('r-buy').textContent    = `${r.precio_compra_min}–${r.precio_compra_max}€`;
+  document.getElementById('r-sell').textContent   = `${r.precio_venta_min}–${r.precio_venta_max}€`;
+  document.getElementById('r-margin').textContent = `${r.precio_venta_min - r.precio_compra_max}–${r.precio_venta_max - r.precio_compra_min}€`;
+  document.getElementById('r-last').textContent   = r.ultimo_precio || '—';
+
+  if (chartInstance) chartInstance.destroy();
+  const proj = r.proyeccion || [80,85,90,95,100,110,120];
+  chartInstance = new Chart(document.getElementById('priceChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: ['2019','2020','2021','2022','2023','2024','2025'],
+      datasets: [
+        { label:'Histórico',  data: proj.slice(0,5),                             borderColor:'#3B5E2B', backgroundColor:'rgba(59,94,43,0.1)', borderWidth:2.5, pointRadius:4, tension:0.4, fill:true },
+        { label:'Proyección', data: [null,null,null,null,proj[4],proj[5],proj[6]], borderColor:'#2E6655', backgroundColor:'rgba(46,102,85,0.07)',  borderWidth:2.5, borderDash:[6,4], pointRadius:4, tension:0.4, fill:true }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:true, labels:{ font:{family:'DM Sans',size:11}, color:'#546048', boxWidth:12, padding:12 }}},
+      scales:{
+        x:{ grid:{color:'#E4E8DE'}, ticks:{font:{family:'DM Sans',size:11},color:'#8A9880'} },
+        y:{ grid:{color:'#E4E8DE'}, ticks:{font:{family:'DM Sans',size:11},color:'#8A9880',callback:v=>v+'€'} }
+      }
+    }
+  });
+
+  document.getElementById('r-negotiate').textContent = r.como_negociar || '';
+
+  const inspEl = document.getElementById('r-inspect'); inspEl.innerHTML = '';
+  (r.que_revisar||[]).forEach(item => { inspEl.innerHTML += `<li><span>🔶</span><span>${item}</span></li>`; });
+
+  const alertsEl = document.getElementById('r-alerts'); alertsEl.innerHTML = '';
+  (r.alertas||[]).forEach(a => { alertsEl.innerHTML += `<div class="alert-item"><span>⚠️</span><span>${a}</span></div>`; });
+
+  document.getElementById('r-minstate').textContent = r.estado_minimo || '';
+  document.getElementById('r-auth').textContent     = r.como_autentificar || '';
+
+  const cleanEl = document.getElementById('r-clean'); cleanEl.innerHTML = '';
+  (r.como_limpiar||[]).forEach(step => { cleanEl.innerHTML += `<li><span>${step}</span></li>`; });
+
+  document.getElementById('r-storage').textContent = r.como_almacenar || '';
+
+  const sellEl = document.getElementById('r-where-sell'); sellEl.innerHTML = '';
+  (r.donde_vender||[]).forEach(s => { sellEl.innerHTML += `<div class="alert-item"><span>🏪</span><span>${s}</span></div>`; });
+
+  const confEl = document.getElementById('r-conf');
+  confEl.textContent  = r.confianza || '—';
+  confEl.className    = 'confidence-badge ' + (r.confianza==='ALTA'?'conf-alta':r.confianza==='MEDIA'?'conf-media':'conf-baja');
+
+  document.getElementById('r-sources').textContent = 'FUENTES: ' + (r.fuentes_usadas || '—');
+
+  showPage('result');
+}
+
+// ── FIREBASE COLLECTION ───────────────────────────────────
+let _collectionCache = null;
+
+async function saveToCollection() {
+  if (!currentResult) return;
+  if (!window._firebaseReady) { showToast('⏳ Firebase cargando, espera un momento'); return; }
+  const entry = {
+    savedAt: new Date().toISOString(),
+    thumb:   currentImages.length > 0 ? currentImages[0].dataUrl : null,
+    data:    currentResult
+  };
+  try {
+    showToast('💾 Guardando…');
+    await window._fbSave(entry);
+    _collectionCache = null;
+    showToast('✅ Guardado en tu colección');
+  } catch(e) {
+    console.error(e);
+    showToast('❌ Error al guardar: ' + e.message);
+  }
+}
+
+async function loadCollection() {
+  if (_collectionCache) return _collectionCache;
+  if (!window._firebaseReady) return [];
+  try { _collectionCache = await window._fbLoad(); return _collectionCache; }
+  catch(e) { console.error(e); return []; }
+}
+
+async function renderCollection() {
+  const statsEl   = document.getElementById('collectionStats');
+  const contentEl = document.getElementById('collectionContent');
+  contentEl.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--text3);"><div class="spinner" style="margin:0 auto 12px"></div><div style="font-size:13px">Cargando colección…</div></div>`;
+
+  const col = await loadCollection();
+  if (col.length === 0) {
+    statsEl.innerHTML = '';
+    contentEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🏺</div><h3>Colección vacía</h3><p>Identifica tu primera antigüedad y guárdala aquí</p></div>`;
+    return;
+  }
+
+  const totalMin = col.reduce((s,e) => s+(e.data.precio_venta_min||0), 0);
+  const totalMax = col.reduce((s,e) => s+(e.data.precio_venta_max||0), 0);
+  statsEl.innerHTML = `
+    <div class="stat-box"><div class="stat-val">${col.length}</div><div class="stat-lbl">Objetos</div></div>
+    <div class="stat-box"><div class="stat-val">${totalMin}€</div><div class="stat-lbl">Valor mín.</div></div>
+    <div class="stat-box"><div class="stat-val">${totalMax}€</div><div class="stat-lbl">Valor máx.</div></div>`;
+
+  const recents = col.slice(0,3), older = col.slice(3);
+  let html = '<div class="section-label">🕐 Recientes</div><div class="antique-grid">';
+  recents.forEach(e => { html += antiqueCardHTML(e); });
+  html += '</div>';
+  if (older.length > 0) {
+    html += '<div class="section-label">📦 Colección completa</div><div class="antique-grid">';
+    older.forEach(e => { html += antiqueCardHTML(e); });
+    html += '</div>';
+  }
+  contentEl.innerHTML = html;
+}
+
+function antiqueCardHTML(e) {
+  const d = e.data, fid = e.firestoreId;
+  const thumb = e.thumb ? `<img src="${e.thumb}" alt="">` : '🏺';
+  const date  = new Date(e.savedAt).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  return `<div class="antique-card" onclick="viewSaved('${fid}')">
+    <div class="antique-thumb">${thumb}</div>
+    <div class="antique-info">
+      <div class="antique-name">${d.nombre||'Antigüedad'}</div>
+      <div class="antique-sub">${d.categoria||d.material||''} · ${d.periodo||''}</div>
+      <div class="antique-sub" style="color:var(--text3);font-size:11px">${date}</div>
+    </div>
+    <div class="antique-price">${d.precio_venta_min}–${d.precio_venta_max}€<span>venta</span></div>
+  </div>`;
+}
+
+async function viewSaved(fid) {
+  const col   = await loadCollection();
+  const entry = col.find(e => e.firestoreId === fid);
+  if (!entry) return;
+  currentResult = entry.data;
+  currentImages = entry.thumb ? [{ dataUrl: entry.thumb, b64: entry.thumb.split(',')[1] }] : [];
+  renderResult(entry.data);
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
